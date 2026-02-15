@@ -14,26 +14,41 @@ This project is a modern blog application built with Next.js, Netlify, and Mongo
 2. **Hosting**: Optimized for [Netlify](https://www.netlify.com/) or [Vercel](https://vercel.com/).
 3. **Database**: [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (Cloud).
 
-## Implementation Details
+### User Authentication
+The application includes a premium login system:
+- **API**: `/api/login` verifies credentials against the `blog_login` collection.
+- **Login Page**: Accessible via `/login`.
+- **Protection**: Creating, editing, and deleting blogs are restricted to authenticated users.
 
-### Features
-- **Dynamic Content**: Blog posts are fetched in real-time from MongoDB.
-- **File Uploads**: Supports zip files and single files via base64 encoding.
-- **Image Previews**: Automatic preview of image attachments in the blog list.
-- **Downloadable Attachments**: One-click download for all stored attachments.
-- **Responsive Navigation**: Clean sidebar navigation for switching between creation and viewing.
+### Tag Management & Filtering
+An optimized tag system is implemented for high-performance filtering:
+- **Global Tag List**: Unique tags are cached in the `blog_login` collection whenever a blog is created or updated. This avoids expensive scans of the entire blog collection.
+- **Sidebar Filtering**: The blog listing page (`/posts`) features a sidebar with a tag dropdown and quick-filter buttons.
+- **API Support**: The `/api/blogs` endpoint supports a `tag` query parameter for filtered, paginated results (15 per page).
 
-### MongoDB Schema
-The application uses the `blog_2026` database and `blog_entry` collection.
+## MongoDB Schema
 
+### Blog Entry (`blog_entry`)
 ```json
 {
-  "_id": "ObjectId(...)",
+  "_id": "ObjectId",
   "title": "String",
   "content": "String",
-  "attachment": "String (Base64 Data URL)",
+  "tags": ["String"],
+  "attachment": "Base64 String (Data URL)",
+  "attachmentName": "String (Original Filename)",
   "createdAt": "Date",
-  "updatedAt": "Date"
+  "updatedAt": "Date (Optional)"
+}
+```
+
+### Login & Global Tags (`blog_login`)
+```json
+{
+  "_id": "ObjectId",
+  "login": "String",
+  "pw": "String",
+  "tags": ["String"] (Used to cache unique tags across all posts)
 }
 ```
 

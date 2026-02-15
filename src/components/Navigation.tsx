@@ -1,31 +1,50 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Burger from "./Burger";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navigation() {
   const router = useRouter();
   const [active, setActive] = useState(false);
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    setIsAuth(document.cookie.includes('auth=true'));
+  }, [router.pathname]);
+
+  const handleLogout = () => {
+    document.cookie = "auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    setIsAuth(false);
+    router.push('/');
+  };
+
   return (
     <>
       <Burger active={active} onClick={() => setActive(!active)} />
       <div className={"container " + (active ? "active" : "")}>
         <ul>
-          <li>
-            <Link href="/" className={router.pathname === "/" ? "active" : undefined}>
-              new
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/posts"
-              className={
-                router.pathname.startsWith("/posts") ? "active" : undefined
-              }
-            >
-              blog
-            </Link>
-          </li>
+          {isAuth && (
+            <>
+              <li>
+                <Link href="/" className={router.pathname === "/" ? "active" : undefined}>
+                  new
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/posts"
+                  className={
+                    router.pathname.startsWith("/posts") ? "active" : undefined
+                  }
+                >
+                  blog
+                </Link>
+              </li>
+              <li>
+                <a onClick={handleLogout} style={{ cursor: 'pointer' }}>logout</a>
+              </li>
+            </>
+          )}
         </ul>
         <style jsx>
           {`
