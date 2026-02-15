@@ -1,6 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../lib/mongodb';
-import { ObjectId } from 'mongodb';
+import { ObjectId, Db } from 'mongodb';
+
+async function cleanupTags(db: Db, tags: string[]) {
+  if (!tags || tags.length === 0) return;
+
+  const collection = db.collection('blog_entry');
+  const loginCollection = db.collection('blog_login');
+
+  for (const tag of tags) {
+    const count = await collection.countDocuments({ tags: tag });
+    if (count === 0) {
+      await loginCollection.updateOne({}, { $pull: { tags: tag } } as any);
+    }
+  }
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const client = await clientPromise;
@@ -13,7 +27,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const skip = (page - 1) * limit;
     const tag = req.query.tag as string;
 
-    const query = tag ? { tags: tag } : {};
+    let query = {};
+    if (tag) {
+      const tagList = tag.split(',').map(t => t.trim()).filter(Boolean);
+      if (tagList.length > 0) {
+        query = { tags: { $all: tagList } };
+      }
+    }
 
     const blogs = await collection.find(query)
       .sort({ createdAt: -1 })
@@ -26,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({ blogs, total, page, totalPages: Math.ceil(total / limit) });
   } else if (req.method === 'POST') {
     const { title, content, attachment, attachmentName, tags } = req.body;
-    const tagList = tags ? tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [];
+    const tagList = tags ? (Array.isArray(tags) ? tags : tags.split(',').map((t: string) => t.trim()).filter(Boolean)) : [];
 
     const result = await collection.insertOne({
       title,
@@ -47,6 +67,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { id, title, content, attachment, attachmentName, tags } = req.body;
     const tagList = tags ? (Array.isArray(tags) ? tags : tags.split(',').map((t: string) => t.trim()).filter(Boolean)) : [];
 
+    const oldPost = await collection.findOne({ _id: new ObjectId(id) });
+    const oldTags = oldPost?.tags || [];
+
     const result = await collection.updateOne(
       { _id: new ObjectId(id) },
       { $set: { title, content, attachment, attachmentName, tags: tagList, updatedAt: new Date() } }
@@ -57,11 +80,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await loginCollection.updateOne({}, { $addToSet: { tags: { $each: tagList } } });
     }
 
+    const removedTags = oldTags.filter((t: string) => !tagList.includes(t));
+    if (removedTags.length > 0) {
+      await cleanupTags(db, removedTags);
+    }
+
     res.status(200).json(result);
   } else if (req.method === 'DELETE') {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'ID required' });
+
+    const postToDelete = await collection.findOne({ _id: new ObjectId(id as string) });
+    const tagsToCleanup = postToDelete?.tags || [];
+
     const result = await collection.deleteOne({ _id: new ObjectId(id as string) });
+
+    if (tagsToCleanup.length > 0) {
+      await cleanupTags(db, tagsToCleanup);
+    }
+
     res.status(200).json(result);
   } else {
     res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);

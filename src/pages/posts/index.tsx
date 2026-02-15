@@ -27,7 +27,7 @@ export default function Index() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
-  const [selectedTag, setSelectedTag] = useState<string>('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isAuth, setIsAuth] = useState(false);
 
   const url = "/posts";
@@ -46,8 +46,9 @@ export default function Index() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const fetchBlogs = async (page: number, tag: string = '') => {
-    const res = await fetch(`/api/blogs?page=${page}&limit=15${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`);
+  const fetchBlogs = async (page: number, tags: string[] = []) => {
+    const tagQuery = tags.length > 0 ? `&tag=${encodeURIComponent(tags.join(','))}` : '';
+    const res = await fetch(`/api/blogs?page=${page}&limit=15${tagQuery}`);
     const data = await res.json();
     setBlogs(data.blogs);
     setTotalPages(data.totalPages);
@@ -65,9 +66,15 @@ export default function Index() {
   };
 
   useEffect(() => {
-    fetchBlogs(1, selectedTag);
+    fetchBlogs(1, selectedTags);
     fetchTags();
-  }, [selectedTag]);
+  }, [selectedTags]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -110,7 +117,7 @@ export default function Index() {
       if (res.ok) {
         setEditingId(null);
         showNotification('Changes saved successfully!');
-        fetchBlogs(currentPage, selectedTag);
+        fetchBlogs(currentPage, selectedTags);
         fetchTags(); // Sync tags in case new ones were added
       } else {
         showNotification('Failed to save changes', 'error');
@@ -126,7 +133,7 @@ export default function Index() {
       if (res.ok) {
         setConfirmDeleteId(null);
         showNotification('Blog deleted successfully!');
-        fetchBlogs(currentPage, selectedTag);
+        fetchBlogs(currentPage, selectedTags);
       } else {
         showNotification('Failed to delete blog', 'error');
       }
@@ -147,19 +154,23 @@ export default function Index() {
       <div className="page-wrapper">
         <aside className="sidebar">
           <h3>Filter by Tag</h3>
-          <select value={selectedTag} onChange={(e) => setSelectedTag(e.target.value)}>
-            <option value="">All Tags</option>
+          <select value={selectedTags.length === 1 ? selectedTags[0] : ''} onChange={(e) => {
+            const val = e.target.value;
+            if (val === '') setSelectedTags([]);
+            else setSelectedTags([val]);
+          }}>
+            <option value="">{selectedTags.length > 1 ? 'Multiple Selected' : 'All Tags'}</option>
             {allTags.map(tag => (
               <option key={tag} value={tag}>{tag}</option>
             ))}
           </select>
           <div className="tag-list">
-            <button className={selectedTag === '' ? 'active' : ''} onClick={() => setSelectedTag('')}>All</button>
+            <button className={selectedTags.length === 0 ? 'active' : ''} onClick={() => setSelectedTags([])}>All</button>
             {allTags.map(tag => (
               <button
                 key={tag}
-                className={selectedTag === tag ? 'active' : ''}
-                onClick={() => setSelectedTag(tag)}
+                className={selectedTags.includes(tag) ? 'active' : ''}
+                onClick={() => toggleTag(tag)}
               >
                 {tag}
               </button>
@@ -173,7 +184,7 @@ export default function Index() {
               {notification.message}
             </div>
           )}
-          <h1>{selectedTag ? `Blogs tagged: ${selectedTag}` : title}</h1>
+          <h1>{selectedTags.length > 0 ? `Blogs tagged: ${selectedTags.join(', ')}` : title}</h1>
           <ul className="blog-list">
             {blogs.map((blog) => (
               <li key={blog._id} className="blog-item">
@@ -234,7 +245,7 @@ export default function Index() {
                         {blog.tags && blog.tags.length > 0 && (
                           <div className="post-tags">
                             {blog.tags.map(tag => (
-                              <span key={tag} className="tag-badge" onClick={() => setSelectedTag(tag)}>#{tag}</span>
+                              <span key={tag} className={`tag-badge ${selectedTags.includes(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>#{tag}</span>
                             ))}
                           </div>
                         )}
@@ -288,9 +299,9 @@ export default function Index() {
           </ul>
           {totalPages > 1 && (
             <div className="pagination">
-              <button disabled={currentPage === 1} onClick={() => fetchBlogs(currentPage - 1, selectedTag)}>Prev</button>
+              <button disabled={currentPage === 1} onClick={() => fetchBlogs(currentPage - 1, selectedTags)}>Prev</button>
               <span>Page {currentPage} of {totalPages}</span>
-              <button disabled={currentPage === totalPages} onClick={() => fetchBlogs(currentPage + 1, selectedTag)}>Next</button>
+              <button disabled={currentPage === totalPages} onClick={() => fetchBlogs(currentPage + 1, selectedTags)}>Next</button>
             </div>
           )}
         </main>
@@ -404,7 +415,7 @@ export default function Index() {
           font-weight: bold;
           cursor: pointer;
         }
-        .tag-badge:hover {
+        .tag-badge:hover, .tag-badge.active {
           background: #0070f3;
           color: white;
         }
