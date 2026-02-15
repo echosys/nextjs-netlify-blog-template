@@ -20,10 +20,25 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [newBlog, setNewBlog] = useState({ title: '', content: '', attachment: '', attachmentName: '', tags: '' });
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [dbStatus, setDbStatus] = useState<'loading' | 'ok' | 'error'>('loading');
 
   useEffect(() => {
     setIsAuth(document.cookie.includes('auth=true'));
+    checkDbStatus();
   }, []);
+
+  const checkDbStatus = async () => {
+    try {
+      const res = await fetch('/api/status');
+      if (res.ok) {
+        setDbStatus('ok');
+      } else {
+        setDbStatus('error');
+      }
+    } catch (err) {
+      setDbStatus('error');
+    }
+  };
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type });
@@ -129,7 +144,14 @@ export default function Index() {
                   />
                 </div>
 
-                <button type="submit" disabled={loading} className="login-btn">
+                <div className="status-indicator-container">
+                  <span className={`status-dot ${dbStatus}`}></span>
+                  <span className="status-text">
+                    Database: {dbStatus === 'loading' ? 'Checking...' : dbStatus === 'ok' ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+
+                <button type="submit" disabled={loading || dbStatus === 'error'} className="login-btn">
                   {loading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
@@ -221,6 +243,42 @@ export default function Index() {
           font-weight: 600;
           cursor: pointer;
           transition: background-color 0.2s;
+        }
+        .status-indicator-container {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+          padding: 0.5rem;
+          background: #f8f9fa;
+          border-radius: 6px;
+          font-size: 0.85rem;
+        }
+        .status-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+        }
+        .status-dot.loading {
+          background-color: #ffc107;
+          animation: pulse 1.5s infinite;
+        }
+        .status-dot.ok {
+          background-color: #28a745;
+          box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+        }
+        .status-dot.error {
+          background-color: #dc3545;
+          box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+        }
+        .status-text {
+          color: #666;
+          font-weight: 500;
+        }
+        @keyframes pulse {
+          0% { opacity: 0.4; }
+          50% { opacity: 1; }
+          100% { opacity: 0.4; }
         }
         .login-btn:hover:not(:disabled) {
           background-color: #0051bb;
