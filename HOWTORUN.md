@@ -1,5 +1,10 @@
-change this to be a blog app 
-should I store the mongo db collection string in next js framework and make this repo private? I am using vercel so want to know how to store this. This page should connect to the mongo db for collection blog_entry, put each document as a row where you can click and edit, the document is text only, with the option to add a attachment if possible, if edited and saved, update the record in mongo db as well. Also have the option to create a new blog. Let me know the mongo db schema or options I need to create to make this availble. 
+TD 
+remove The Public Blog (Static) Running on MDX Files (stored in content/posts/).
+python script to upload cur ip as note to mongo db
+  setup up forward 
+add cf pages for contact db 
+
+
 
 ## Framework
 
@@ -48,6 +53,7 @@ Install Command
 npm install
 
 npm run start
+npm run dev 
 
 ### tools 
 jetbrain pycharm plugin gemini code assist stuck on We're experiencing a high volume of usage right now, so we're temporarily at capacity. Try again later.
