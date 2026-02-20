@@ -117,7 +117,10 @@ export default function Index() {
           <div className="login-wrapper">
             <div className="login-card">
               <h1>Welcome Back</h1>
-              <p className="subtitle">Sign in to manage your blog</p>
+              <p className="subtitle">
+                Build: {process.env.NEXT_PUBLIC_BUILD_TIME}<br />
+                Commit: {process.env.NEXT_PUBLIC_GIT_COMMIT}
+              </p>
 
               <form onSubmit={handleLogin}>
                 <div className="input-group">
@@ -220,7 +223,12 @@ export default function Index() {
           text-align: center;
           color: #666;
           margin-bottom: 2rem;
-          font-size: 0.95rem;
+          font-size: 0.8rem;
+          line-height: 1.4;
+          font-family: monospace;
+          background: #f4f4f4;
+          padding: 0.5rem;
+          border-radius: 4px;
         }
         .input-group {
           margin-bottom: 1.5rem;
