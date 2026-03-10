@@ -34,10 +34,20 @@ export default function Navigation() {
                 <Link
                   href="/posts"
                   className={
-                    router.pathname.startsWith("/posts") ? "active" : undefined
+                    router.pathname === "/posts" ? "active" : undefined
                   }
                 >
-                  blog
+                  blog (mongo)
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/posts/pg"
+                  className={
+                    router.pathname === "/posts/pg" ? "active" : undefined
+                  }
+                >
+                  blog (postgres)
                 </Link>
               </li>
               <li>
