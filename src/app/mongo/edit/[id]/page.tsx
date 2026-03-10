@@ -19,17 +19,20 @@ export default function MongoEditPost() {
 
     useEffect(() => {
         async function load() {
-            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-            const res = await fetch(`${baseUrl}/api/blogs?page=1&limit=1000`);
-            const data = await res.json();
-            const found = data.blogs?.find((b: any) => b._id === id);
-            if (found) {
-                setPost(found);
-                setFileName(found.attachmentName || null);
+            try {
+                const res = await fetch(`/api/blogs?id=${id}`);
+                if (res.ok) {
+                    const post = await res.json();
+                    setPost(post);
+                    setFileName(post.attachmentName || null);
+                }
+            } catch (e) {
+                console.error('Failed to load post', e);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         }
-        load();
+        if (id) load();
     }, [id]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

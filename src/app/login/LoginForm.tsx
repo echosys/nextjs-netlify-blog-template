@@ -1,32 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LogIn, Database } from "lucide-react";
+import { LogIn, Database, ServerCrash } from "lucide-react";
+
+type DbStatus = 'idle' | 'checking' | 'ok' | 'error';
+
+interface DbState {
+    status: DbStatus;
+    host: string;
+    message?: string;
+}
+
+function StatusDot({ status }: { status: DbStatus }) {
+    if (status === 'checking') return (
+        <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse inline-block" />
+    );
+    if (status === 'ok') return (
+        <span className="relative flex w-2.5 h-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
+            <span className="relative inline-flex rounded-full w-2.5 h-2.5 bg-teal-400" />
+        </span>
+    );
+    if (status === 'error') return (
+        <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
+    );
+    return <span className="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block" />;
+}
+
+function StatusLabel({ status, host }: { status: DbStatus; host: string }) {
+    if (status === 'checking') return <span className="text-xs text-yellow-400 font-medium">Checking...</span>;
+    if (status === 'ok') return (
+        <span className="text-xs text-teal-400 font-medium truncate max-w-[120px]" title={host}>
+            {host || 'Connected'}
+        </span>
+    );
+    if (status === 'error') return <span className="text-xs text-rose-400 font-medium">Unreachable</span>;
+    return <span className="text-xs text-slate-500">—</span>;
+}
 
 export default function LoginForm() {
     const [login, setLogin] = useState("");
     const [pw, setPw] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [dbStatus, setDbStatus] = useState<'idle' | 'checking' | 'ok' | 'error'>('idle');
+    const [mongo, setMongo] = useState<DbState>({ status: 'idle', host: '' });
+    const [pg, setPg] = useState<DbState>({ status: 'idle', host: '' });
     const router = useRouter();
 
-    const checkDb = async () => {
-        setDbStatus('checking');
-        try {
-            const res = await fetch('/api/status');
-            setDbStatus(res.ok ? 'ok' : 'error');
-        } catch {
-            setDbStatus('error');
-        }
-    };
+    useEffect(() => {
+        // Check MongoDB
+        setMongo({ status: 'checking', host: '' });
+        fetch('/api/status')
+            .then(async res => {
+                if (res.ok) {
+                    setMongo({ status: 'ok', host: 'MongoDB Atlas' });
+                } else {
+                    const d = await res.json().catch(() => ({}));
+                    setMongo({ status: 'error', host: '', message: d.message });
+                }
+            })
+            .catch(() => setMongo({ status: 'error', host: '' }));
 
-    // check DB status on mount
-    if (dbStatus === 'idle') {
-        // trigger once after render
-        setTimeout(checkDb, 0);
-    }
+        // Check Postgres
+        setPg({ status: 'checking', host: '' });
+        fetch('/api/pg_status')
+            .then(async res => {
+                const d = await res.json().catch(() => ({}));
+                if (res.ok) {
+                    setPg({ status: 'ok', host: d.host || 'Postgres' });
+                } else {
+                    setPg({ status: 'error', host: d.host || '', message: d.message });
+                }
+            })
+            .catch(() => setPg({ status: 'error', host: '' }));
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,34 +102,46 @@ export default function LoginForm() {
         }
     };
 
+    const mongoDown = mongo.status === 'error';
+
     return (
         <>
-            <div className="mb-6 p-4 rounded-xl bg-slate-950/50 border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Database size={18} className="text-slate-400" />
-                    <span className="text-sm font-medium text-slate-300">MongoDB Status</span>
+            {/* Database Status Panel */}
+            <div className="mb-6 rounded-xl bg-slate-950/50 border border-slate-800 overflow-hidden">
+                <div className="px-4 py-2 border-b border-slate-800 flex items-center gap-2">
+                    <Database size={14} className="text-slate-500" />
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Database Status</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    {dbStatus === 'checking' && <div className="w-3 h-3 rounded-full bg-yellow-400 animate-pulse" />}
-                    {dbStatus === 'ok' && (
-                        <>
-                            <span className="absolute inline-flex w-3 h-3 rounded-full opacity-75 animate-ping bg-teal-400" />
-                            <span className="relative inline-flex w-3 h-3 rounded-full bg-teal-400" />
-                            <span className="text-xs text-teal-400 font-medium">Connected</span>
-                        </>
-                    )}
-                    {dbStatus === 'error' && (
-                        <>
-                            <span className="relative inline-flex w-3 h-3 rounded-full bg-rose-500" />
-                            <span className="text-xs text-rose-400 font-medium">Disconnected</span>
-                        </>
-                    )}
-                    {dbStatus === 'idle' && <span className="text-xs text-slate-500">Checking...</span>}
+                <div className="divide-y divide-slate-800">
+                    {/* MongoDB row */}
+                    <div className="px-4 py-3 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <StatusDot status={mongo.status} />
+                            <span className="text-sm font-medium text-slate-300 shrink-0">MongoDB</span>
+                            <span className="text-xs text-slate-600 font-mono truncate hidden sm:block">
+                                (login / auth)
+                            </span>
+                        </div>
+                        <StatusLabel status={mongo.status} host={mongo.host} />
+                    </div>
+                    {/* Postgres row */}
+                    <div className="px-4 py-3 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <StatusDot status={pg.status} />
+                            <span className="text-sm font-medium text-slate-300 shrink-0">Postgres</span>
+                            <span className="text-xs text-slate-600 font-mono truncate hidden sm:block">
+                                (blog content)
+                            </span>
+                        </div>
+                        <StatusLabel status={pg.status} host={pg.host} />
+                    </div>
                 </div>
             </div>
 
+            {/* Error banner */}
             {error && (
-                <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm">
+                <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm flex items-center gap-2">
+                    <ServerCrash size={16} />
                     {error}
                 </div>
             )}
@@ -112,8 +172,8 @@ export default function LoginForm() {
 
                 <button
                     type="submit"
-                    disabled={isLoading || dbStatus === 'error'}
-                    className="w-full bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg flex justify-center items-center gap-2 transition-all shadow-lg shadow-teal-500/20 mt-6"
+                    disabled={isLoading || mongoDown}
+                    className="w-full bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg flex justify-center items-center gap-2 transition-all shadow-lg shadow-teal-500/20 mt-2"
                 >
                     {isLoading ? (
                         <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -124,8 +184,18 @@ export default function LoginForm() {
                         </>
                     )}
                 </button>
+
+                {mongoDown && (
+                    <p className="text-center text-xs text-rose-400 mt-2">
+                        Login is unavailable — MongoDB is unreachable.
+                    </p>
+                )}
+                {pg.status === 'error' && !mongoDown && (
+                    <p className="text-center text-xs text-yellow-500 mt-1">
+                        Postgres is unreachable — Mongo Blog will work, Postgres Blog won&apos;t.
+                    </p>
+                )}
             </form>
         </>
     );
 }
-
