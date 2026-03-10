@@ -22,94 +22,127 @@ export default function Navigation() {
     <>
       <Burger active={active} onClick={() => setActive(!active)} />
       <div className={"container " + (active ? "active" : "")}>
-        <ul>
-          {isAuth && (
-            <>
-              <li>
-                <Link href="/" className={router.pathname === "/" ? "active" : undefined}>
-                  new
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/posts"
-                  className={
-                    router.pathname === "/posts" ? "active" : undefined
-                  }
-                >
-                  blog (mongo)
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/posts/pg"
-                  className={
-                    router.pathname === "/posts/pg" ? "active" : undefined
-                  }
-                >
-                  blog (postgres)
-                </Link>
-              </li>
-              <li>
-                <a onClick={handleLogout} style={{ cursor: 'pointer' }}>logout</a>
-              </li>
-            </>
-          )}
-        </ul>
+        <div className="nav-wrapper">
+          <div className="logo-section">
+            <span className="text-xl font-bold bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+              BlogManager
+            </span>
+          </div>
+          <ul>
+            {isAuth && (
+              <>
+                <li>
+                  <Link href="/" className={router.pathname === "/" ? "active" : undefined}>
+                    new
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/posts"
+                    className={
+                      router.pathname === "/posts" ? "active" : undefined
+                    }
+                  >
+                    mongo
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/posts/pg"
+                    className={
+                      router.pathname === "/posts/pg" ? "active" : undefined
+                    }
+                  >
+                    postgres
+                  </Link>
+                </li>
+                <li className="logout-li">
+                  <button onClick={handleLogout} className="logout-btn">
+                    Logout
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>
+        </div>
         <style jsx>
           {`
             .container {
-              width: 0;
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 64px;
+              display: flex;
+              align-items: center;
+              background: rgba(15, 23, 42, 0.8);
+              backdrop-filter: blur(8px);
+              border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+              z-index: 50;
+              padding: 0 2rem;
+            }
+            .nav-wrapper {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              width: 100%;
+              max-width: 1200px;
+              margin: 0 auto;
             }
             ul {
-              opacity: 0;
-              width: 100%;
-              height: 100vh;
-              text-align: right;
+              display: flex;
               list-style: none;
               margin: 0;
               padding: 0;
-              position: fixed;
-              top: 0;
-              background-color: #fff;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              z-index: 1;
-              transform: translateY(100%);
-              transition: opacity 200ms;
-            }
-            .active ul {
-              opacity: 1;
-              transform: translateY(0);
+              gap: 2rem;
+              align-items: center;
             }
             li {
-              margin-bottom: 1.75rem;
-              font-size: 2rem;
-              padding: 0 1.5rem 0 0;
+              font-size: 0.9rem;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
             }
-            li:last-child {
-              margin-bottom: 0;
+            li :global(a) {
+              color: #94a3b8;
+              text-decoration: none;
+              transition: color 0.2s;
             }
-            .active {
-              color: #222;
+            li :global(a.active) {
+              color: #2dd4bf;
+            }
+            li :global(a:hover) {
+              color: #f1f5f9;
+            }
+            .logout-btn {
+              background: rgba(244, 63, 94, 0.1);
+              color: #fb7185;
+              border: 1px solid rgba(244, 63, 94, 0.2);
+              padding: 0.4rem 1rem;
+              border-radius: 8px;
+              font-size: 0.8rem;
+              cursor: pointer;
+              transition: all 0.2s;
+            }
+            .logout-btn:hover {
+              background: #f43f5e;
+              color: white;
             }
 
-            @media (min-width: 769px) {
+            @media (max-width: 768px) {
               .container {
-                width: 7rem;
-                display: block;
+                height: auto;
+                padding: 1rem;
+                flex-direction: column;
+                display: none;
+              }
+              .container.active {
+                display: flex;
               }
               ul {
-                opacity: 1;
-                width: 7rem;
-                top: auto;
-                display: block;
-                transform: translateY(0);
-              }
-              li {
-                font-size: 1rem;
-                padding: 0;
+                flex-direction: column;
+                margin-top: 2rem;
+                width: 100%;
               }
             }
           `}
