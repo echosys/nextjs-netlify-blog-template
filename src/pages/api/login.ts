@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (user) {
         // In a real app, use JWT or sessions. For this template, we'll return success.
         // The user mentioned "simple cookie-based auth".
-        res.setHeader('Set-Cookie', `auth=true; Path=/; SameSite=Strict; Max-Age=86400`);
+        res.setHeader('Set-Cookie', `auth=true; Path=/; SameSite=Strict; Max-Age=315360000`);
         res.status(200).json({ success: true });
     } else {
         res.status(401).json({ error: 'Invalid credentials' });
