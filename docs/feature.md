@@ -68,11 +68,14 @@ nextjs-netlify-blog-template/
 │   │   │   ├── MongoDeleteButton.tsx ← Client delete with confirm
 │   │   │   ├── new/page.tsx        ← Create post form
 │   │   │   └── edit/[id]/page.tsx  ← Edit post form
-│   │   └── pg/                     ← Postgres blog section
-│   │       ├── page.tsx            ← Post list (server component, direct DB)
-│   │       ├── PgDeleteButton.tsx  ← Client delete with confirm
-│   │       ├── new/page.tsx        ← Create post form (chunked upload)
-│   │       └── edit/[id]/page.tsx  ← Edit post form (chunked upload)
+│   │   ├── pg/                     ← Postgres blog section
+│   │   │   ├── page.tsx            ← Post list (server component, direct DB)
+│   │   │   ├── PgPostList.tsx      ← Client-side list management & preview logic
+│   │   │   ├── PgDeleteButton.tsx  ← Client delete with confirm
+│   │   │   ├── new/page.tsx        ← Create post form (chunked upload)
+│   │   │   └── edit/[id]/page.tsx  ← Edit post form (chunked upload)
+│   ├── components/                 ← Shared UI components
+│   │   ├── PostPreview.tsx         ← Modal for full blog content view
 │   ├── pages/
 │   │   ├── _app.tsx                ← Pages Router wrapper (API only)
 │   │   └── api/                    ← All backend API routes
@@ -141,6 +144,15 @@ nextjs-netlify-blog-template/
 - **Teal accent** — buttons, active states, links, progress bars all use `teal-500`
 - **Rose danger** — delete confirm, logout hover, error states use `rose-400/500`
 - **Build/commit footer** — shows `NEXT_PUBLIC_BUILD_TIME` and `NEXT_PUBLIC_GIT_COMMIT` at bottom of every page
+- **Database Status in Footer** — dynamic indicators for MongoDB and PostgreSQL connectivity with partial hostnames for identification.
+
+### Blog Post Preview
+- **Interactive Preview Pane** — accessible by clicking any post card (not the edit button).
+- **Full Content Rendering** — displays the entire post with proper whitespace preservation.
+- **Keyboard Navigation** — move between posts using **Left/Right arrows** and close with **Escape**.
+- **UI Controls** — dedicated next/previous buttons and a close (X) button.
+- **Quick Edit** — an "Edit Post" button within the preview leads directly to the post's edit page.
+- **Responsive Design** — adjusts for mobile with bottom navigation controls.
 
 ### API Endpoints
 

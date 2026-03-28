@@ -1,8 +1,3 @@
-TD 
-remove The Public Blog (Static) Running on MDX Files (stored in content/posts/).
-python script to upload cur ip as note to mongo db
-  setup up forward 
-add cf pages for contact db 
 
 
 

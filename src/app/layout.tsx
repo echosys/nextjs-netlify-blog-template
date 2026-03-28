@@ -41,10 +41,33 @@ export default async function RootLayout({
                     </header>
                     <main>{children}</main>
                 </div>
-                <footer className="mt-20 py-6 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
-                    <p>Build: <span className="font-mono text-slate-400">{process.env.NEXT_PUBLIC_BUILD_TIME || 'dev'}</span></p>
-                    <p>Commit: <span className="font-mono text-slate-400">{process.env.NEXT_PUBLIC_GIT_COMMIT || 'local'}</span></p>
+                <footer className="mt-20 py-8 border-t border-slate-800 text-xs text-slate-500 flex flex-col gap-6 items-center">
+                    <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+                        <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+                            <span className="text-slate-400 font-medium">MongoDB:</span>
+                            <span className="font-mono text-slate-500">
+                                {process.env.MONGODB_URI?.includes('mongodb.net') 
+                                    ? process.env.MONGODB_URI.split('@')[1]?.split('.')[0] || 'Atlas'
+                                    : 'Connected'}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                            <span className="text-slate-400 font-medium">PostgreSQL:</span>
+                            <span className="font-mono text-slate-500">
+                                {process.env.POSTGRES_URL?.includes('neon.tech') 
+                                    ? 'Neon' 
+                                    : process.env.POSTGRES_URL?.split('@')[1]?.split('.')[0] || 'Connected'}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-6 opacity-60">
+                        <p>Build: <span className="font-mono text-slate-400">{process.env.NEXT_PUBLIC_BUILD_TIME || 'dev'}</span></p>
+                        <p>Commit: <span className="font-mono text-slate-400">{process.env.NEXT_PUBLIC_GIT_COMMIT || 'local'}</span></p>
+                    </div>
                 </footer>
+
             </body>
         </html>
     );

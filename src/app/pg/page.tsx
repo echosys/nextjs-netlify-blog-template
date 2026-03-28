@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus, Tag, Edit2, Download, CheckCircle2, X } from "lucide-react";
-import PgDeleteButton from "./PgDeleteButton";
+import PgPostList from "./PgPostList";
 import { pgDb } from "../../lib/pg";
 
 export const dynamic = 'force-dynamic';
@@ -87,69 +87,7 @@ export default async function PgBlogPage({
                         </Link>
                     </div>
 
-                    <div className="grid gap-6">
-                        {posts.length === 0 ? (
-                            <div className="text-center py-20 border-2 border-dashed border-slate-800 rounded-xl text-slate-500">
-                                No posts found for this filter.
-                                {!process.env.POSTGRES_URL && (
-                                    <p className="mt-2 text-xs text-rose-400">POSTGRES_URL is not set in your environment.</p>
-                                )}
-                            </div>
-                        ) : (
-                            posts.map((post: any) => (
-                                <article
-                                    key={post.id}
-                                    className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-all group"
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="flex-1 min-w-0 pr-4">
-                                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors">
-                                                {post.title}
-                                            </h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {post.tags?.map((t: string) => (
-                                                    <span key={t} className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-800 px-2 py-0.5 rounded">
-                                                        #{t}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                            <Link
-                                                href={`/pg/edit/${post.id}`}
-                                                className="p-2 text-slate-400 hover:text-teal-400 hover:bg-teal-400/10 rounded-lg transition-all"
-                                            >
-                                                <Edit2 size={16} />
-                                            </Link>
-                                            <PgDeleteButton id={post.id} />
-                                        </div>
-                                    </div>
-
-                                    <p className="text-slate-400 line-clamp-3 mb-6 leading-relaxed whitespace-pre-wrap">
-                                        {post.content}
-                                    </p>
-
-                                    <div className="flex justify-between items-center text-sm pt-4 border-t border-slate-800/50">
-                                        <span className="text-slate-500 font-medium">
-                                            {new Date(post.created_at).toLocaleDateString(undefined, {
-                                                month: 'short', day: 'numeric', year: 'numeric'
-                                            })}
-                                        </span>
-                                        {post.attachment_name && (
-                                            <a
-                                                href={`/api/pg_blogs/download/${post.id}`}
-                                                download={post.attachment_name}
-                                                className="flex items-center gap-2 text-teal-400 bg-teal-400/10 px-3 py-1.5 rounded-full hover:bg-teal-400/20 transition-all font-medium"
-                                            >
-                                                <Download size={14} />
-                                                <span className="truncate max-w-[140px]">{post.attachment_name}</span>
-                                            </a>
-                                        )}
-                                    </div>
-                                </article>
-                            ))
-                        )}
-                    </div>
+                    <PgPostList posts={posts} />
                 </div>
             </div>
         </div>

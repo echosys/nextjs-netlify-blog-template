@@ -1,0 +1,61 @@
+   
+//
+    after each change, 
+    make sure you update relavent database info in database.md and features in features.md and code design related info in architecture.md with latest changes. for daily progress it should also be updated in z_progress folder one file per day sample filename is 20260319_setup.md, also make sure configs are in config.json file and add logging needed to debug, logs should be saved in logs folder. 
+
+    check in features.md to build the first version of software
+    Read and follow AGENT_GUIDELINES.md
+    All changes must comply.
+
+    Did you:
+        - update architecture.md?
+        - update features.md?
+        - update database.md?
+        - update z_progress?
+
+        If not, fix it now.
+    “List all files that should have been updated but were not.”
+
+
+//
+
+  BUILD.md              ← how to build/run UI safely
+  TOOLS.md              ← tools required, versions, access
+  ENV.json              ← environment constraints (ports, Node, Electron SQLite)
+  SKILLS.json           ← learned fixes / persistent knowledge
+
+
+
+//20260327 
+    TD 
+    remove The Public Blog (Static) Running on MDX Files (stored in content/posts/).
+    python script to upload cur ip as note to mongo db
+    setup up forward 
+    add cf pages for contact db 
+
+    ### vercel CICD 
+    Build Command
+    npm run build
+    Output Directory
+    Next.js default
+    Install Command
+    npm install
+
+    npm run start
+    npm run dev 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

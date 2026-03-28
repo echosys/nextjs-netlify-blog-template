@@ -14,6 +14,9 @@ This project is a modern blog application built with Next.js, Netlify, and Mongo
 2. **Hosting**: Optimized for [Netlify](https://www.netlify.com/) or [Vercel](https://vercel.com/).
 3. **Database**: [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (Cloud).
 
+- **Blog Post Preview**: A dedicated client-side modal (`PostPreview.tsx`) allows users to read the full content of any post without leaving the main page. It supports keyboard navigation (Left/Right, Esc) and provides quick access to the edit view.
+- **Client Listing Control**: The blog lists are now managed by `MongoPostList.tsx` and `PgPostList.tsx` to handle the interactive preview and delete functionality seamlessly.
+
 ### User Authentication
 The application includes a premium login system:
 - **API**: `/api/login` verifies credentials against the `blog_login` collection.
