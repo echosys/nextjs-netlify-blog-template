@@ -38,7 +38,9 @@ export default function MongoPostList({ blogs }: MongoPostListProps) {
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1 min-w-0 pr-4">
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors uppercase tracking-tight">{blog.title}</h3>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors">
+                  {blog.title}
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {blog.tags?.map((t: string) => (
                     <span key={t} className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-800 px-2 py-0.5 rounded">#{t}</span>

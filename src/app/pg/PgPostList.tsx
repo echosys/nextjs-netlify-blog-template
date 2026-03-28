@@ -41,6 +41,7 @@ export default function PgPostList({ posts: rawPosts }: PgPostListProps) {
                 <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors">
                   {post.title}
                 </h3>
+
                 <div className="flex flex-wrap gap-2">
                   {post.tags?.map((t: string) => (
                     <span key={t} className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-800 px-2 py-0.5 rounded">
